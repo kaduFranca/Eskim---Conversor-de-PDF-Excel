@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <link rel="icon" href="images/logo eskimó.PNG" type="image/png">
+  <link rel="icon" href="./logo eskimó.PNG" type="image/png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Eskimó | Facilites</title>
 
   <style>
-    /* Centraliza o conteúdo e define o layout da página */
+    
     body {
       display: flex;
       flex-direction: column;
@@ -19,7 +19,6 @@
       background-color: #f5f5f5;
     }
 
-    /* Estilos para o contêiner principal */
     .container {
       text-align: center;
       background-color: #ffffff;
@@ -28,13 +27,11 @@
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
-    /* Estilos para o título */
     h1 {
       color: #333333;
       margin-bottom: 20px;
     }
 
-    /* Estilos para o botão */
     button {
       background-color: #4CAF50;
       color: white;
@@ -62,7 +59,7 @@
 </head>
 <body>
   <div>
-    <img style="position: absolute; top: 15px; left: 15px; max-height: 60px;" src="./images/Logo_eskimó_Sorvetes_Vermelha.png" alt="logo">
+    <img style="position: absolute; top: 15px; left: 15px; max-height: 60px;" src="./Logo_eskimó_Sorvetes_Vermelha.png" alt="logo">
   </div>
 
   <div class="container">
@@ -72,7 +69,6 @@
     <button id="convertButton">Converter para Excel</button>
   </div>
   
-  <!-- Importação das bibliotecas -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -88,7 +84,6 @@
         return;
       }
 
-      // Lista de produtos para verificar
       const produtos = [
         "ACAI ESKIMO 1L COM GUARANA",
               "ACAI ESKIMO 230ML COM BANANA",
@@ -326,22 +321,18 @@
               "SUNDAE 80G BAUNILHA COM CHOCOTELLA",
               "SUNDAE 80G FRUTA DO BOSCO",
               "TIGELA PARA SORVETE COM COLHER",
-        // Adicione mais produtos conforme necessário
       ];
 
-      // Carrega o PDF
       const pdfData = await pdfInput.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
       const extractedData = []; // Lista para armazenar os dados extraídos
 
-      // Cabeçalho da planilha
       extractedData.push(["Descrição", "Quantidade Itens Vendidos"]); 
 
       let foundTableStart = false; // Flag para marcar o início dos dados
       let currentRow = []; // Linha atual de dados
       const produtosEncontrados = {}; // Objeto para armazenar produtos encontrados
 
-      // Extrair texto do PDF
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
@@ -356,16 +347,14 @@
 
           if (!foundTableStart) return;
 
-          // Adiciona o texto à linha atual
           if (text !== '') {
             currentRow.push(text.split("|")[0]); // Armazena as 6 colunas
           }          
-          // Se a linha atual tiver 6 colunas, processa os dados
+          
           if (currentRow.length === 6) {
             const quantidadeVendida = currentRow[1]; // Coluna 2
             const descricao = currentRow[3]; // Coluna 4
 
-            // Verifica se a quantidade vendida é um número
             if (!isNaN(quantidadeVendida) && quantidadeVendida.trim() !== "") {
               produtosEncontrados[descricao] = quantidadeVendida; // Armazena a quantidade vendida para o produto encontrado
             }
@@ -375,18 +364,15 @@
         });
       }
 
-      // Adiciona os produtos encontrados ao arquivo Excel, e se algum produto da lista não foi encontrado, adiciona com quantidade vazia
       produtos.forEach((produto) => {
         const quantidade = produtosEncontrados[produto] || ""; // Se não encontrado, a quantidade é vazia
         extractedData.push([produto, quantidade != '' ? `-${quantidade}` : '']);
       });
 
-      // Criação do arquivo Excel
       const worksheet = XLSX.utils.aoa_to_sheet(extractedData);
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
 
-      // Exportação do Excel
       XLSX.writeFile(workbook, "resultado.xlsx");
       alert("Arquivo Excel gerado com sucesso!");
     }
