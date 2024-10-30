@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <link rel="icon" href="images/logo eskimó.PNG" type="image/png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Eskimó | Facilites</title>
+
+  <style>
+    /* Centraliza o conteúdo e define o layout da página */
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f5f5f5;
+    }
+
+    /* Estilos para o contêiner principal */
+    .container {
+      text-align: center;
+      background-color: #ffffff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Estilos para o título */
+    h1 {
+      color: #333333;
+      margin-bottom: 20px;
+    }
+
+    /* Estilos para o botão */
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: background-color 0.3s;
+    }
+
+    /* Estilo do botão ao passar o mouse */
+    button:hover {
+      background-color: #45a049;
+    }
+
+    /* Estilos para o input de arquivo */
+    input[type="file"] {
+      margin-top: 15px;
+      font-size: 16px;
+    }
+  </style>
+
+</head>
+<body>
+  <div>
+    <img style="position: absolute; top: 15px; left: 15px; max-height: 60px;" src="./images/Logo_eskimó_Sorvetes_Vermelha.png" alt="logo">
+  </div>
+
+  <div class="container">
+    <h1>Produtos vendidos - Aventureiro</h1>
+    <input type="file" id="pdfInput" accept=".pdf" />
+    <br />
+    <button id="convertButton">Converter para Excel</button>
+  </div>
+  
+  <!-- Importação das bibliotecas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+  <script>
+    window.onload = function() {
+      document.getElementById("convertButton").onclick = convertPDFtoExcel;
+    };
+
+    async function convertPDFtoExcel() {
+      const pdfInput = document.getElementById("pdfInput").files[0];
+      if (!pdfInput) {
+        alert("Por favor, selecione um arquivo PDF.");
+        return;
+      }
+
+      // Lista de produtos para verificar
+      const produtos = [
+        "ACAI ESKIMO 1L COM GUARANA",
+              "ACAI ESKIMO 230ML COM BANANA",
+              "ACAI ESKIMO 230ML COM GUARANA",
+              "ACAI FRUTA BRASILEIRA 1.02KG BANANA",
+              "ACAI FRUTA BRASILEIRA 1.02KG IORGUTE GREGO",
+              "ACAI FRUTA BRASILEIRA 1.02KG MORANGO",
+              "ACAI FRUTA BRASILEIRA 1.02KG NATURAL",
+              "ACAI FRUTA BRASILEIRA 220ML BANANA",
+              "ACAI FRUTA BRASILEIRA 220ML GREGO",
+              "ACAI FRUTA BRASILEIRA 220ML MORANGO",
+              "ACAI FRUTA BRASILEIRA 220ML NATURAL",
+              "ACAI FRUTA BRASILEIRA 5KG NATURAL",
+              "ACAI POLPA NORTE 1.02 KG BANANA",
+              "ACAI POLPA NORTE 1.02 KG MORANGO",
+              "ACAI POLPA NORTE 1.02KG TRADICIONAL",
+              "ACAI POLPA NORTE 220G MIX TURMA DA MONICA BANANA",
+              "ACAI POLPA NORTE 220G MIX TURMA DA MONICA MORANGO",
+              "ACAI POLPA NORTE 220G MIX TURMA DA MONICA TRADICIONAL",
+              "ACAI POLPA NORTE 500G MIX TURMA DA MONICA BANANA",
+              "ACAI POLPA NORTE 500G MIX TURMA DA MONICA MORANGO",
+              "ACAI POLPA NORTE 500G MIX TURMA DA MONICA TRADICIONAL",
+              "AGUA MINERAL 350ML CRYSTAL VIP",
+              "AGUA MINERAL 500ML CRYSTAL COM GAS",
+              "AGUA MINERAL 500ML CRYSTAL SEM GAS",
+              "BEST CUP 750ML ABACAXI AO VINHO",
+              "BEST CUP 750ML CHOCODULCE",
+              "BEST CUP 750ML CHOCOMALT",
+              "BEST CUP 750ML CHOCOTELLA",
+              "BEST CUP 750ML COCO",
+              "BEST CUP 750ML DOCE DE LEITE",
+              "BEST CUP 750ML FLORESTA NEGRA",
+              "BEST CUP 750ML MIL FOLHAS",
+              "BEST CUP 750ML MOCAFFE COM CARAMELO",
+              "BEST CUP 750ML PISTACHE",
+              "BEST CUP 750ML TORTA DE AMENDOIM",
+              "CASCAO DISHEY MIX PCT 10UN",
+              "CASCAO DISHEY TRADICIONAL PCT 10UN",
+              "CASCAO MARVI MIX PCT 10 UN",
+              "CASCAO MARVI TRADICIONAL PCT 10 UN",
+              "CASQUINHA DISHEY TRADICIONAL PCT 10 UN",
+              "CASQUINHA MARVI BAUNILHA PCT C 10 UN",
+              "CASQUINHA MARVI MIX PCT C 10 UN",
+              "CHOCOLATE M MS TUBINHO 30G",
+              "COBERTURA SORVETEMIX ALGODAO DOCE 300GR",
+              "COBERTURA SORVETEMIX CARAMELO 300GR",
+              "COBERTURA SORVETEMIX CHICLETE 300GR",
+              "COBERTURA SORVETEMIX CHOCOLATE 300GR",
+              "COBERTURA SORVETEMIX MORANGO 300GR",
+              "COLHER PARA SORVETE",
+              "CONE SELETTO BRIGADEIRO",
+              "CONE SELETTO CROCANTE",
+              "COPINHO GOURMET BOMBOM DE COCO",
+              "COPINHO GOURMET CARAMELO SALGADO",
+              "COPINHO GOURMET MORANGO AO LEITE",
+              "COPINHO GOURMET TORTA DE LIMAO",
+              "CREME DE CUPUACU FRUTA BRASILEIRA 1.02 KG",
+              "CREME DE CUPUACU POLPA NORTE 750ML",
+              "DOCE BALA DE BANANA INDIA",
+              "DOCE BALA FREEGELLS AZEDINHO MORANGO",
+              "DOCE BALA FREEGELLS AZEDINHO UVA",
+              "DOCE BALA FREEGELLS CEREJA",
+              "DOCE BALA FREEGELLS CREAM MORANGO",
+              "DOCE BALA FREEGELLS EUCALIPTO",
+              "DOCE BALA FREEGELLS EXTRA FORTE",
+              "DOCE BALA FREEGELLS FRESH MELAO",
+              "DOCE BALA FREEGELLS MENTA",
+              "DOCE BALA FREEGELLS MORANGO",
+              "DOCE BALA FREEGELLS MORANGO RECHEIO CHOCOLATE",
+              "DOCE BALA FREEGELLS VIT C",
+              "DOCE BALA GELATINA AMORAS FINI 15G",
+              "DOCE BALA GELATINA FINI 15G BANANAS",
+              "DOCE BALA GELATINA FINI 15G BEIJOS",
+              "DOCE BALA GELATINA FINI 15G DENTADURAS",
+              "DOCE BALA GELATINA FINI 15G MINHOCAS",
+              "DOCE BALA GELATINA FINI 15G MINHOCAS AZEDINHAS",
+              "DOCE BALA GELATINA FINI 35G BANANAS",
+              "DOCE BALA GOMA TUBO GOMETS DORI 32G",
+              "DOCE BALA HALLS 28 G",
+              "DOCE BALA MENTOS",
+              "DOCE BALA TIC TAC 14.5 G",
+              "DOCE CHICLE BLONG 200 G SABORES DIVERSOS",
+              "DOCE CHICLE DANCLETS TUTTI FRUTTI C 45 13.5G",
+              "DOCE CHICLE DISPLAY GUDS 18G C/6",
+              "DOCE CHICLE FREEGELLS GUM CANELA",
+              "DOCE CHICLE FREEGELLS GUM EXTRA FORTE",
+              "DOCE CHICLE FREEGELLS GUM HORTELA",
+              "DOCE CHICLE FREEGELLS GUM MELANCIA",
+              "DOCE CHICLE FREEGELLS GUM MENTA",
+              "DOCE CHICLE FREEGELLS GUM MORANGO",
+              "DOCE CHICLE FREEGELLS GUM ORIGINAL CHERRY",
+              "DOCE CHICLE FREEGELLS GUM ORIGINAL MINT",
+              "DOCE CHICLE FREEGELLS GUM TUTTI FRUTTI",
+              "DOCE CHOCOLATE BARRA LACTA 34G",
+              "DOCE CHOCOLATE BATON GAROTO MIX 16G",
+              "DOCE CHOCOLATE CHOIM MISTO",
+              "DOCE CHOCOLATE M MS TUBINHO 30G",
+              "DOCE CHOCOLATE PRESTIGIO 33G",
+              "DOCE CHOCOLATE SONHO DE VALSA 25G",
+              "DOCE CHOCOLATE TRENTO 32G TRAD. MIX",
+              "DOCE CHOCOLATE TRENTO MASSIMO MIX",
+              "DOCE DISQUETI 40G",
+              "DOCE DISQUETI MINI",
+              "DOCE FINI TUBES AZEDINHOS CEREJA MACA VERDE 15G",
+              "DOCE FINI TUBES AZEDINHOS FRUTAS SILVESTRES 15 G",
+              "DOCE FINI TUBES AZEDINHOS MORANGO 15 G",
+              "DOCE FINI TUBES AZEDINHOS SABOR UVA 15G",
+              "DOCE FINI TUBES AZEDINHOS TUTTI FRUTTI 15 G",
+              "DOCE FINI TUBES MORANGO E NATA 15G",
+              "DOCE FINI TUBES PINTA LINGUA 15 G",
+              "DOCE FINI TUBES TWISTER 15G",
+              "DOCE M MS TUBO CHOC AO LEITE 30G",
+              "DOCE PACOCAO DE AMENDOIM",
+              "DOCE PACOQUINHA ROLHA 15G",
+              "DOCE PASTILHA APITO LOKO",
+              "DOCE PIRULITO CATAVENTO FRUTAS",
+              "DOCE PIRULITO DIP LOKO BOOM FRUTAS VERMELHAS",
+              "DOCE PIRULITO DIP LOKO BOOM MORANGO",
+              "DOCE PIRULITO DIP LOKO BOOM UVA",
+              "DOCE PIRULITO POP MANIA BARBIE",
+              "DOCE PIRULITO POP MANIA MAXXI FRAMBOESA",
+              "DOCE PIRULITO POP MINI FRUTAS",
+              "DOCE TORRONE ARCOR 25 G",
+              "DOCE TORRONE C AMENDOIM",
+              "DOCE TRIDENT SABORES DIVERSOS 8 G",
+              "ENERGETICO MONSTER ENERGY LT 473 ML",
+              "ENERGETICO MONSTER ENERGY ZERO ACUCAR LT 473ML",
+              "ENERGETICO MONSTER PACIFIC PUNCH JUICE LT 473 ML",
+              "NAPOLICUP 250ML",
+              "PALETA MEXICANA CHOCOLATE COM BRIGADEIRO",
+              "PALETA MEXICANA LEITINHO TRUFADO",
+              "PALETA MEXICANA MARACUJA COM LEITE CONDENSADO",
+              "PALETA MEXICANA MORANGO COM LEITE CONDENSADO",
+              "PICOLE AVARIA",
+              "PICOLE BOMBOM BRIGADEIRO",
+              "PICOLE BOMBOM SKIMO",
+              "PICOLE CREME CHOCOLATE",
+              "PICOLE CREME COCO",
+              "PICOLE CREME LEITE CONDENSADO",
+              "PICOLE CREME MILHO VERDE",
+              "PICOLE CREME MORANGO",
+              "PICOLE CREME NATA",
+              "PICOLE CREME SPECIALE",
+              "PICOLE DIAMOND CHOCOMALT",
+              "PICOLE DIAMOND COOKIES",
+              "PICOLE DIAMOND COOKIES BIANCO",
+              "PICOLE FRUTA ABACAXI",
+              "PICOLE FRUTA AGUA DE COCO",
+              "PICOLE FRUTA FRAMBOESA",
+              "PICOLE FRUTA LIMAO",
+              "PICOLE FRUTA MINISAIA",
+              "PICOLE FRUTA UVA",
+              "PICOLE GREGO FRUTAS VERMELHAS",
+              "PICOLE ITUZINHO BANANA FLAMBADA",
+              "PICOLE ITUZINHO CHICLETES",
+              "PICOLE ITUZINHO LEITINHO TRUFADO",
+              "PICOLE ITUZINHO MOUSSE DE MARACUJA",
+              "PICOLE KIDS BOB ESPONJA",
+              "PICOLE KIDS PATRICK",
+              "PICOLE KIDS UNICORNIO",
+              "PICOLE LA SOBREMESA BAUNILHA COM CHOCOTELLA",
+              "PICOLE LA SOBREMESA CHOCOLATE COM COCO",
+              "PICOLE LA SOBREMESA CHOCONUT",
+              "PICOLE LA SOBREMESA PUDIM DE LEITE",
+              "PICOLE LA SOBREMESA QUATRO LEITES COM AMARENA",
+              "PICOLE LA SOBREMESA ROMEU E JULIETA",
+              "PICOLE LA SOBREMESA SAGU",
+              "PICOLE LA SOBREMESA TORTA DE AMENDOIM",
+              "PICOLE LA SOBREMESA TORTA DE LIMAO",
+              "PICOLE MAIS COCO",
+              "PICOLE MAIS COCO QUEIMADO",
+              "PICOLE MAIS PACOCA",
+              "PICOLE MOCAFFE",
+              "PICOLE NAPOLITANO",
+              "PICOLE PICOLAPIS SURPRESA",
+              "PICOLE SUPER BARRITA",
+              "PICOLE ZERO ACUCAR CHOCOLATE",
+              "PICOLE ZERO ACUCAR COCO",
+              "POLPA DE FRUTA POLPA NORTE 100G ABACAXI",
+              "POLPA DE FRUTA POLPA NORTE 100G ACEROLA",
+              "POLPA DE FRUTA POLPA NORTE 100G MARACUJÁ",
+              "POLPA DE FRUTA POLPA NORTE 100G UVA",
+              "POTE SORVETE 1.5LT CLASSICOS ABACAXI COM COCO",
+              "POTE SORVETE 1.5LT CLASSICOS BANANA COM CHOCOTELLA",
+              "POTE SORVETE 1.5LT CLASSICOS BRIGADEIRO",
+              "POTE SORVETE 1.5LT CLASSICOS CHOCOLAK",
+              "POTE SORVETE 1.5LT CLASSICOS FLOCOS",
+              "POTE SORVETE 1.5LT CLASSICOS L. CONDENSADO CHOCOLATE",
+              "POTE SORVETE 1.5LT CLASSICOS LEITINHO TRUFADO",
+              "POTE SORVETE 1.5LT CLASSICOS MARTA ROCHA",
+              "POTE SORVETE 1.5LT CLASSICOS TRUFA",
+              "POTE SORVETE 1.5LT CLASSICOS PASSAS AO RUM",
+              "POTE SORVETE 1.5LT CLASSICOS TRAMONTARO",
+              "POTE SORVETE 1.5LT FRUTA CALDA ABACAXI",
+              "POTE SORVETE 1.5LT FRUTA CALDA LIMAO",
+              "POTE SORVETE 1.5LT FRUTA CALDA MARACUJA",
+              "POTE SORVETE 1.5LT FRUTA CALDA UVA",
+              "POTE SORVETE 1.5LT NEVADO IOGURTE GREGO COM AMORA",
+              "POTE SORVETE 1.5LT NEVADO NATA TRUFADA",
+              "POTE SORVETE 1LT ZERO ACUCAR BEIJINHO SIRIO",
+              "POTE SORVETE 1LT ZERO ACUCAR FRUTAS VERMELHAS",
+              "POTE SORVETE 2LT ABACAXI COM COCO",
+              "POTE SORVETE 2LT BANANA COM CHOCOTELLA",
+              "POTE SORVETE 2LT BRIGADEIRO",
+              "POTE SORVETE 2LT CHOCOCO",
+              "POTE SORVETE 2LT CHOCOLAK",
+              "POTE SORVETE 2LT CHOCOLATE BRANCO",
+              "POTE SORVETE 2LT CHOCOMENTA",
+              "POTE SORVETE 2LT COCO MILHO VERDE",
+              "POTE SORVETE 2LT CREME",
+              "POTE SORVETE 2LT CREME FLOCOS E CHOCOLATE",
+              "POTE SORVETE 2LT FLOCOS",
+              "POTE SORVETE 2LT FLOCOS COM MORANGO",
+              "POTE SORVETE 2LT LEITE CONDENSADO E CHOCOLATE",
+              "POTE SORVETE 2LT LEITINHO TRUFADO",
+              "POTE SORVETE 2LT MARTA ROCHA",
+              "POTE SORVETE 2LT MORANGO",
+              "POTE SORVETE 2LT NAPOLITANO",
+              "POTE SORVETE 2LT NATA UVA",
+              "POTE SORVETE 2LT PASSAS AO RUM",
+              "POTE SORVETE 2LT TRAMONTARO",
+              "POTE SORVETE 2LT TRUFA",
+              "REFRI COCA COLA 200ML MINI",
+              "REFRI COCA COLA 350ML LT",
+              "REFRI COCA COLA 350ML ZERO",
+              "REFRI COCA COLA 600ML",
+              "REFRI COCA COLA ORIGINAL PET 2L",
+              "REFRI KUAT GUARANA LT 350 ML",
+              "ROLINHOS TUB IN AVELA",
+              "ROLINHOS TUB IN BRIGADEIRO",
+              "ROLINHOS TUB IN CHOCOLATE",
+              "ROLINHOS TUB IN MORANGO",
+              "ROLINHOS TUB IN NAPOLITANO",
+              "ROLINHOS TUB IN TRUFAS",
+              "SUNDAE 80G BAUNILHA COM CHOCOTELLA",
+              "SUNDAE 80G FRUTA DO BOSCO",
+              "TIGELA PARA SORVETE COM COLHER",
+        // Adicione mais produtos conforme necessário
+      ];
+
+      // Carrega o PDF
+      const pdfData = await pdfInput.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+      const extractedData = []; // Lista para armazenar os dados extraídos
+
+      // Cabeçalho da planilha
+      extractedData.push(["Descrição", "Quantidade Itens Vendidos"]); 
+
+      let foundTableStart = false; // Flag para marcar o início dos dados
+      let currentRow = []; // Linha atual de dados
+      const produtosEncontrados = {}; // Objeto para armazenar produtos encontrados
+
+      // Extrair texto do PDF
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+
+        textContent.items.forEach((item) => {
+          const text = item.str.trim();
+
+          if (text === "Taxas Cartão") {
+            foundTableStart = true;
+            return; 
+          }
+
+          if (!foundTableStart) return;
+
+          // Adiciona o texto à linha atual
+          if (text !== '') {
+            currentRow.push(text.split("|")[0]); // Armazena as 6 colunas
+          }          
+          // Se a linha atual tiver 6 colunas, processa os dados
+          if (currentRow.length === 6) {
+            const quantidadeVendida = currentRow[1]; // Coluna 2
+            const descricao = currentRow[3]; // Coluna 4
+
+            // Verifica se a quantidade vendida é um número
+            if (!isNaN(quantidadeVendida) && quantidadeVendida.trim() !== "") {
+              produtosEncontrados[descricao] = quantidadeVendida; // Armazena a quantidade vendida para o produto encontrado
+            }
+
+            currentRow = []; // Reseta a linha atual
+          }
+        });
+      }
+
+      // Adiciona os produtos encontrados ao arquivo Excel, e se algum produto da lista não foi encontrado, adiciona com quantidade vazia
+      produtos.forEach((produto) => {
+        const quantidade = produtosEncontrados[produto] || ""; // Se não encontrado, a quantidade é vazia
+        extractedData.push([produto, quantidade != '' ? `-${quantidade}` : '']);
+      });
+
+      // Criação do arquivo Excel
+      const worksheet = XLSX.utils.aoa_to_sheet(extractedData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Dados");
+
+      // Exportação do Excel
+      XLSX.writeFile(workbook, "resultado.xlsx");
+      alert("Arquivo Excel gerado com sucesso!");
+    }
+  </script>
+</body>
+</html>
